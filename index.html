@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Fluency 一小時上手：Anthropic 4D 協作框架</title>
+<meta name="description" content="一小時免費互動課程，帶你搞懂 Anthropic 官方 AI Fluency 框架：授權、描述、鑑別、勤勉四大能力，從「會用 AI」升級成「會跟 AI 協作」。">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-69VB5XW9C7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-69VB5XW9C7');
+</script>
+<style>
+/* ============ 主題變數（深色為預設） ============ */
+:root {
+  --bg: #0d1117;
+  --bg-soft: #161b22;
+  --bg-card: #1c2333;
+  --bg-card-hover: #232c40;
+  --border: #2d3748;
+  --text: #e6edf3;
+  --text-dim: #9aa7b8;
+  --text-faint: #6b7688;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.13);
+  --accent2: #fb923c;
+  --accent2-soft: rgba(251, 146, 60, 0.13);
+  --green: #3fb950;
+  --green-soft: rgba(63, 185, 80, 0.14);
+  --red: #f85149;
+  --red-soft: rgba(248, 81, 73, 0.13);
+  --purple: #bc8cff;
+  --purple-soft: rgba(188, 140, 255, 0.13);
+  --pink: #ff7b9c;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --mono: "SFMono-Regular", "Cascadia Code", Consolas, "Courier New", monospace;
+}
+html.light {
+  --bg: #f6f8fa;
+  --bg-soft: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f3f7;
+  --border: #d7dde5;
+  --text: #1f2733;
+  --text-dim: #4b5768;
+  --text-faint: #7b8798;
+  --accent: #0284c7;
+  --accent2: #ea580c;
+  --accent-soft: rgba(2, 132, 199, 0.11);
+  --accent2-soft: rgba(234, 88, 12, 0.11);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", -apple-system, sans-serif;
+  line-height: 1.75;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+}
+
+#topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+#scrollbar { height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.1s linear; }
+.nav-inner {
+  max-width: 960px; margin: 0 auto; padding: 8px 16px;
+  display: flex; align-items: center; gap: 6px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-logo { font-weight: 800; color: var(--accent); white-space: nowrap; margin-right: 8px; font-size: 15px; text-decoration: none; }
+.nav-step {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 11px; border-radius: 999px; white-space: nowrap;
+  font-size: 13px; color: var(--text-faint); text-decoration: none;
+  border: 1px solid transparent; transition: all 0.2s;
+}
+.nav-step .dot {
+  width: 20px; height: 20px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--bg-card); border: 1px solid var(--border);
+  display: grid; place-items: center; font-size: 11px; font-weight: 700;
+}
+.nav-step:hover { color: var(--text); background: var(--bg-card); }
+.nav-step.active { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+.nav-step.active .dot { background: var(--accent); color: #041a26; border-color: var(--accent); }
+.nav-step.done .dot { background: var(--green-soft); color: var(--green); border-color: var(--green); }
+#theme-toggle {
+  margin-left: auto; flex: 0 0 auto; background: var(--bg-card); color: var(--text-dim);
+  border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px;
+  cursor: pointer; font-size: 13px; font-family: inherit;
+}
+#theme-toggle:hover { color: var(--text); }
+
+main { max-width: 960px; margin: 0 auto; padding: 90px 20px 60px; }
+section { padding: 44px 0; border-bottom: 1px dashed var(--border); scroll-margin-top: 70px; }
+section:last-of-type { border-bottom: none; }
+
+.time-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent2-soft); color: var(--accent2);
+  font-size: 13px; font-weight: 700; padding: 3px 12px; border-radius: 999px;
+  margin-bottom: 12px; letter-spacing: 0.5px;
+}
+h1 { font-size: clamp(30px, 6vw, 52px); line-height: 1.25; font-weight: 900; letter-spacing: -0.5px; }
+h2 { font-size: clamp(24px, 4.5vw, 36px); line-height: 1.3; font-weight: 800; margin-bottom: 18px; }
+h3 { font-size: 21px; font-weight: 700; margin: 30px 0 10px; }
+h2 .kicker { display: block; font-size: 14px; color: var(--accent); letter-spacing: 2px; font-weight: 700; margin-bottom: 6px; }
+p { margin: 14px 0; color: var(--text); }
+p.dim, li.dim { color: var(--text-dim); }
+strong { color: var(--accent); font-weight: 700; }
+em { color: var(--pink); font-style: normal; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 8px 0; }
+code { font-family: var(--mono); background: var(--bg-card); border: 1px solid var(--border); padding: 1px 7px; border-radius: 6px; font-size: 0.88em; color: var(--accent2); }
+
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px 24px; margin: 20px 0;
+}
+.callout { border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 var(--radius) var(--radius) 0; padding: 16px 20px; margin: 20px 0; }
+.callout.orange { border-left-color: var(--accent2); background: var(--accent2-soft); }
+.callout.red { border-left-color: var(--red); background: var(--red-soft); }
+.callout.green { border-left-color: var(--green); background: var(--green-soft); }
+.callout.purple { border-left-color: var(--purple); background: var(--purple-soft); }
+.callout p:first-child { margin-top: 0; }
+.callout p:last-child { margin-bottom: 0; }
+.callout-title { font-weight: 800; font-size: 15px; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+
+button.primary {
+  background: var(--accent); color: #041a26; border: none; font-family: inherit;
+  font-size: 16px; font-weight: 800; padding: 11px 26px; border-radius: 999px;
+  cursor: pointer; transition: transform 0.12s, filter 0.2s;
+}
+button.primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+button.ghost {
+  background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+  font-family: inherit; font-size: 15px; padding: 10px 20px; border-radius: 999px; cursor: pointer;
+}
+button.ghost:hover { color: var(--text); border-color: var(--text-dim); }
+
+.cta-card { text-align: center; }
+.cta-card h3 { margin: 0 0 8px; }
+.cta-card p.dim { margin: 0 0 18px; }
+.cta-btn {
+  display: inline-block; background: var(--accent); color: #041a26; font-family: inherit;
+  font-size: 16px; font-weight: 800; padding: 11px 26px; border-radius: 999px;
+  text-decoration: none; transition: transform 0.12s, filter 0.2s;
+}
+.cta-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+#hero { padding-top: 30px; border-bottom: 1px dashed var(--border); }
+.hero-tag { color: var(--accent2); font-weight: 700; letter-spacing: 3px; font-size: 14px; margin-bottom: 14px; }
+.hero-sub { font-size: 19px; color: var(--text-dim); margin-top: 18px; max-width: 720px; }
+.hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 30px; }
+.hero-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; text-align: center; }
+.hero-stat .num { font-size: 26px; font-weight: 900; color: var(--accent); }
+.hero-stat .lbl { font-size: 13px; color: var(--text-faint); }
+.agenda { margin-top: 26px; }
+.agenda-row { display: flex; gap: 12px; align-items: baseline; padding: 9px 0; border-bottom: 1px dashed var(--border); font-size: 15.5px; }
+.agenda-row:last-child { border-bottom: none; }
+.agenda-row .t { flex: 0 0 62px; color: var(--accent2); font-weight: 700; font-family: var(--mono); font-size: 13.5px; }
+.agenda-row a { color: var(--text); text-decoration: none; }
+.agenda-row a:hover { color: var(--accent); }
+
+.chunk {
+  display: inline-block; padding: 3px 10px; margin: 3px; border-radius: 8px;
+  background: var(--accent-soft); border: 1px solid var(--accent);
+  color: var(--accent); font-weight: 700; font-size: 15px;
+}
+.chunk.hot { background: var(--accent2-soft); border-color: var(--accent2); color: var(--accent2); }
+.chunk.purple { background: var(--purple-soft); border-color: var(--purple); color: var(--purple); }
+
+.table-wrap { overflow-x: auto; margin: 18px 0; }
+table.cmp { width: 100%; border-collapse: collapse; font-size: 15px; }
+table.cmp th, table.cmp td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; vertical-align: top; }
+table.cmp th { background: var(--bg-soft); font-size: 14px; letter-spacing: 1px; }
+table.cmp td:first-child { font-weight: 700; white-space: nowrap; }
+
+.quiz { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin: 20px 0; background: var(--bg-card); }
+.quiz-q { font-weight: 800; font-size: 17.5px; margin-bottom: 14px; }
+.quiz-q .qnum { color: var(--accent); margin-right: 6px; }
+.quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+.quiz-opt {
+  text-align: left; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text);
+  font-family: inherit; font-size: 15.5px; padding: 11px 16px; border-radius: 10px; cursor: pointer;
+  transition: all 0.15s; line-height: 1.5;
+}
+.quiz-opt:hover:not(:disabled) { border-color: var(--accent2); }
+.quiz-opt:disabled { cursor: default; }
+.quiz-opt.correct { border-color: var(--green); background: var(--green-soft); color: var(--green); font-weight: 700; }
+.quiz-opt.wrong { border-color: var(--red); background: var(--red-soft); color: var(--red); }
+.quiz-expl { margin-top: 12px; font-size: 15px; color: var(--text-dim); display: none; border-top: 1px dashed var(--border); padding-top: 12px; }
+.quiz-expl.show { display: block; animation: pop 0.3s; }
+.quiz-expl .verdict { font-weight: 900; }
+@keyframes pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+
+.big-quote { font-size: clamp(20px, 3.6vw, 28px); font-weight: 900; text-align: center; padding: 30px 18px; line-height: 1.5; }
+.big-quote .hl { color: var(--accent); }
+
+footer { text-align: center; color: var(--text-faint); font-size: 13.5px; padding: 30px 16px 50px; }
+
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .nav-step span.nm { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav id="topnav">
+  <div id="scrollbar"></div>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#hero">AI&nbsp;FLUENCY</a>
+    <a class="nav-step" href="#s1" data-sec="s1"><span class="dot">1</span><span class="nm">為什麼</span></a>
+    <a class="nav-step" href="#s2" data-sec="s2"><span class="dot">2</span><span class="nm">授權</span></a>
+    <a class="nav-step" href="#s3" data-sec="s3"><span class="dot">3</span><span class="nm">描述</span></a>
+    <a class="nav-step" href="#s4" data-sec="s4"><span class="dot">4</span><span class="nm">鑑別</span></a>
+    <a class="nav-step" href="#s5" data-sec="s5"><span class="dot">5</span><span class="nm">勤勉</span></a>
+    <a class="nav-step" href="#s6" data-sec="s6"><span class="dot">6</span><span class="nm">結業考</span></a>
+    <button id="theme-toggle" title="切換深淺色">☀️ 淺色</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ================================================================ -->
+<!-- HERO -->
+<!-- ================================================================ -->
+<section id="hero">
+  <div class="hero-tag">免費互動課程</div>
+  <h1>別再只會下 Prompt，<br>學會跟 AI 真正<span style="color:var(--accent)">協作</span></h1>
+  <p class="hero-sub">
+    這堂課帶你走一遍 Anthropic 官方的 AI Fluency 框架（4D Framework）——
+    用一小時，把你跟 AI 的關係從「碰運氣」升級成「有方法」。
+  </p>
+  <div class="hero-grid">
+    <div class="hero-stat"><div class="num">4 個</div><div class="lbl">核心能力</div></div>
+    <div class="hero-stat"><div class="num">3 種</div><div class="lbl">互動模式</div></div>
+    <div class="hero-stat"><div class="num">60 分鐘</div><div class="lbl">完課時間</div></div>
+    <div class="hero-stat"><div class="num">0 行</div><div class="lbl">公式與術語轟炸</div></div>
+  </div>
+
+  <div class="card agenda">
+    <strong style="color:var(--text)">📋 課程時間表</strong>
+    <div class="agenda-row"><span class="t">10 min</span><a href="#s1">第 1 章 · 為什麼需要 AI Fluency</a></div>
+    <div class="agenda-row"><span class="t">12 min</span><a href="#s2">第 2 章 · Delegation（授權）：先想清楚再開口</a></div>
+    <div class="agenda-row"><span class="t">12 min</span><a href="#s3">第 3 章 · Description（描述）：把話說到 AI 心坎裡</a></div>
+    <div class="agenda-row"><span class="t">12 min</span><a href="#s4">第 4 章 · Discernment（鑑別）：別被講得很順的答案騙了</a></div>
+    <div class="agenda-row"><span class="t">9 min</span><a href="#s5">第 5 章 · Diligence（勤勉）：出事的時候，責任在誰身上</a></div>
+    <div class="agenda-row"><span class="t">5 min</span><a href="#s6">第 6 章 · 結業測驗</a></div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 1 章 -->
+<!-- ================================================================ -->
+<section id="s1">
+  <span class="time-badge">⏱ 10 分鐘</span>
+  <h2><span class="kicker">第 1 章 · 觀念打底</span>會用 AI 跟會跟 AI 協作，是兩件事</h2>
+
+  <p>
+    你身邊一定有這種人：同樣是用 Claude 或 ChatGPT，有人拿它做出整個 side project，
+    有人只會叫它「幫我寫一篇文章」然後嫌它寫得爛。差別不在誰的 Prompt 比較華麗，
+    而在一種更底層的能力——Anthropic 把它叫做 <strong>AI Fluency（AI 流利度）</strong>：
+    用「有效、高效、倫理、安全」的方式跟 AI 系統互動的能力。
+    注意這四個詞，它不只是「產出好不好」，還包含「你花了多少力氣」「這樣做妥不妥當」「會不會出事」。
+  </p>
+
+  <div class="callout">
+    <span class="callout-title">📖 這套框架的來源</span>
+    <p>
+      這套框架來自 Anthropic 官方的免費課程「AI Fluency: Framework &amp; Foundations」，
+      由 Ringling 藝術設計學院的 Rick Dakan 教授與愛爾蘭科克大學的 Joseph Feller 教授跟 Anthropic 合作設計。
+      這堂課就是把它消化成一小時的人話版本，讓你不用啃原文也能把精髓帶走。
+    </p>
+  </div>
+
+  <h3>先建立一張地圖：三種互動模式</h3>
+  <p>
+    在進入框架之前，先建立一個地圖：你跟 AI 的互動，其實落在一條<strong>自主程度</strong>的光譜上，有三種模式。
+  </p>
+  <p>
+    第一種是<strong>自動化（Automation）</strong>——「執行此流程」。你把每一步都定義好，
+    AI 在你畫的框框裡執行：摘要文件、翻譯信件、從一堆亂七八糟的文字裡抽出結構化資料。AI 自主程度低，你是發號施令的人。
+  </p>
+  <p>
+    第二種是<strong>增強（Augmentation）</strong>——「讓我們一起解決」。你跟 AI 像兩個工程師在白板前討論：
+    一起來回迭代雲端架構設計、一起窮舉「這個系統可能怎麼壞掉」。沒有人事先知道答案長什麼樣，答案是在多輪對話中長出來的。
+  </p>
+  <p>
+    第三種是<strong>代理（Agency）</strong>——你只給目標，AI 自己決定怎麼達成，甚至代表你行動。
+    例如一個持續幫你分信的 AI：它自己判斷哪些是例行信、哪些是重要信，重要的還直接幫你約好會議。
+    自主程度最高，你從「操作者」變成「委託人」。
+  </p>
+
+  <div class="table-wrap">
+    <table class="cmp">
+      <tr><th>模式</th><th>一句話</th><th>自主程度</th><th>例子</th></tr>
+      <tr><td>自動化 Automation</td><td>執行此流程</td><td>低——你定義每一步</td><td>摘要文件、翻譯信件、抽取結構化資料</td></tr>
+      <tr><td>增強 Augmentation</td><td>讓我們一起解決</td><td>中——多輪來回共創</td><td>一起迭代架構設計、窮舉失敗模式</td></tr>
+      <tr><td>代理 Agency</td><td>你給目標，它自己動</td><td>高——它代表你行動</td><td>自動分信、判斷重要性、自行約會議</td></tr>
+    </table>
+  </div>
+
+  <p>
+    這三種模式沒有誰高級誰低級——重點是你要「有意識地」選擇現在用哪一種，
+    而不是糊里糊塗地把該自己想的事丟給 AI，或把 AI 能全自動跑的事自己手動磨半天。
+    而要做好這個選擇，你需要四種互相扣連的能力：<strong>授權（Delegation）</strong>、
+    <strong>描述（Description）</strong>、<strong>鑑別（Discernment）</strong>、<strong>勤勉（Diligence）</strong>。
+    這就是 4D 框架，接下來一個一個拆。
+  </p>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 2 章：Delegation -->
+<!-- ================================================================ -->
+<section id="s2">
+  <span class="time-badge">⏱ 12 分鐘</span>
+  <h2><span class="kicker">第 2 章 · 第一個 D</span>Delegation（授權）：開口之前先想清楚</h2>
+
+  <p>
+    很多人跟 AI 合作失敗，敗在還沒打第一個字之前。授權（Delegation）講的就是這件事：
+    設定目標，然後決定「要不要」「何時」「如何」讓 AI 參與。它有三層。
+  </p>
+
+  <h3>第一層：問題認知（Problem awareness）</h3>
+  <p>
+    在下 Prompt 之前，先把問題本身定義清楚。
+  </p>
+  <div class="callout orange">
+    <span class="callout-title">💬 框架裡最扎心的一句話</span>
+    <p>「AI 加速專業，但很少取代專業。」</p>
+  </div>
+  <p>
+    舉個例子：你想做一套詐騙偵測系統，直接丟給 AI「幫我做詐騙偵測」是沒用的，
+    因為你得先知道要抓哪幾種詐騙、抓到之後的處理流程是什麼、有哪些法規限制、可以容忍多少誤判率——
+    這些是你的領域判斷，AI 沒辦法替你決定。你自己都說不清楚的問題，AI 只會還你一坨看起來很像答案的東西。
+  </p>
+
+  <h3>第二層：平台認知（Platform awareness）</h3>
+  <p>
+    知道不同 AI 工具的強項跟極限，把任務丟給對的工具。複雜的軟體開發找程式特化的 LLM；
+    要生成創意圖像找擴散模型；查文獻找有搜尋增強的 LLM；多步驟、需要自主行動的任務才交給 agentic 系統。
+    這跟你不會拿螺絲起子敲釘子是同一個道理——工具沒選對，Prompt 寫再好都是白工。
+  </p>
+
+  <h3>第三層：任務授權（Task delegation）</h3>
+  <p>
+    像設計軟體架構一樣設計「人機分工」——定義邊界、職責、介面、誰對什麼負責。
+    以寫一本技術書為例：讀者是誰、章節結構怎麼排、內容正不正確、最後定稿——這些由人負責；
+    腦力激盪點子、把大綱展開成草稿、整理參考資料、修文法——這些交給 AI。
+    你看，這不是「AI 寫書」也不是「人寫書」，而是一張清楚的分工表。
+  </p>
+
+  <div class="callout green">
+    <span class="callout-title">⚖️ 弱授權 vs 強授權</span>
+    <p><strong>弱：</strong>「幫我寫一本教 Python 的書。」</p>
+    <p><strong>強：</strong>「我在寫一本給轉職者的 Python 入門書，讀者定位、章節架構、範例正確性由我把關；
+      你負責針對第三章大綱提出三種展開方式，並幫我整理每個小節可以引用的官方文件連結。」</p>
+    <p>前者是把方向盤整個丟出去，後者是清楚地說「這段路你開，但地圖在我手上」。
+      花五分鐘想清楚分工，常常省掉後面幾小時的來回鬼打牆。</p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 3 章：Description -->
+<!-- ================================================================ -->
+<section id="s3">
+  <span class="time-badge">⏱ 12 分鐘</span>
+  <h2><span class="kicker">第 3 章 · 第二個 D</span>Description（描述）：從 Prompt 進化到 Context</h2>
+
+  <p>
+    分工想清楚了，接下來才是「怎麼說」。描述（Description）的重點是：
+    有效地把你的目標、脈絡、期望、限制講給 AI 聽，讓它產出真正有用的東西。
+  </p>
+  <div class="callout purple">
+    <span class="callout-title">🔧 提示工程 → 語境工程</span>
+    <p>
+      業界已經從「提示工程（prompt engineering）」走向「語境工程（context engineering）」，因為大家發現：
+      <strong>精良結構化的語境搭配普通的提示措辭，通常會勝過措辭精心雕琢但語境很差的提示。</strong>
+      翻成人話：把背景資料備齊、把限制講明白，比你絞盡腦汁想「神奇咒語」有用多了。
+    </p>
+  </div>
+
+  <h3>產品描述（Product description）</h3>
+  <p>清楚指定你要的產出長什麼樣。</p>
+  <div class="callout green">
+    <p><strong>弱：</strong>「摘要本季財務報告。」</p>
+    <p><strong>強：</strong>「為只有 10 分鐘的高階主管摘要這份季報，聚焦商業風險、營收趨勢、戰略建議，
+      用條列式，最多一頁，標出跟上一季顯著不同的數字，避免複雜財務術語。」</p>
+  </div>
+  <p>
+    兩者的差別不是字數，而是後者把「給誰看、看多久、重點是什麼、格式長怎樣、什麼不要出現」全部講清楚了。
+    AI 不會通靈，你沒說的它只能猜。
+  </p>
+
+  <h3>流程描述（Process description）</h3>
+  <p>
+    不只講「產出什麼」，還講「AI 應該怎麼思考、怎麼進行」。經典例子是家教流程：
+    請 AI 先釐清題目中模糊的地方並等學生回覆；接著把問題拆成編號步驟，但一次只揭露第一步；
+    等學生嘗試；答錯時給一個針對性的提示（而不是直接給答案）；所有步驟都試過之後，才公布完整解法。
+    你規範的不是答案，而是整個互動的節奏——這在教學、code review、逐步除錯這類場景特別好用。
+  </p>
+
+  <h3>績效描述（Performance description）</h3>
+  <p>直接定義你想要的「協作行為」本身，跟具體任務無關，調整的是 AI 這個「同事」的工作風格：</p>
+  <ul>
+    <li>「當你認為我推理有誤時要提出異議」</li>
+    <li>「如果我的要求含糊，回答前先問一個釐清問題」</li>
+    <li>「回覆盡量在 200 字以內，除非我明確要求更多」</li>
+    <li>「對不確定的事實要標註不確定性」</li>
+  </ul>
+  <p>
+    很多人抱怨 AI 太順從、太囉嗦、太愛裝懂——其實這些都是可以用一句話調整的，只是你從來沒說。
+  </p>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 4 章：Discernment -->
+<!-- ================================================================ -->
+<section id="s4">
+  <span class="time-badge">⏱ 12 分鐘</span>
+  <h2><span class="kicker">第 4 章 · 第三個 D</span>Discernment（鑑別）：越自信的答案，越要冷靜看</h2>
+
+  <div class="callout red">
+    <span class="callout-title">⚠️ 必須刻在腦子裡的事實</span>
+    <p>
+      LLM 在生成文字時，做的是「產生統計上最可能的下一段文字」，而不是「從資料庫裡撈出查證過的事實」。
+      所以它可以用跟講正確答案一模一樣的自信口吻，講出完全捏造的內容——包括不存在的論文、不存在的 API、不存在的法條。
+      正確的心態是：把每一個 LLM 輸出當成「有參考價值的建議」，而不是「查證過的事實」。
+    </p>
+  </div>
+
+  <h3>產品鑑別（Product discernment）：檢查最終產出</h3>
+  <p>有五個標準可以當 checklist：</p>
+  <ul>
+    <li><strong>事實準確性</strong>——每個主張都能對照權威來源查證嗎？</li>
+    <li><strong>完整性</strong>——該涵蓋的都涵蓋了嗎？</li>
+    <li><strong>內部一致性</strong>——論述前後有沒有自相矛盾？</li>
+    <li><strong>領域有效性</strong>——領域專家看了會覺得可信嗎？</li>
+    <li><strong>問責制</strong>——你願意在這份東西上簽自己的名字嗎？</li>
+  </ul>
+  <p>最後一項特別好用：只要想像「這份東西掛我的名字發出去」，你的標準馬上會嚴格起來。</p>
+
+  <h3>流程鑑別（Process discernment）：檢查推理，不只看答案</h3>
+  <p>
+    就算答案看起來對，推理過程也可能是錯的。例如一段數學推導，中途用了一個不成立的假設，
+    卻因為後面另一個錯誤剛好抵銷，最後得到正確答案——這叫<strong>補償性錯誤（compensating errors）</strong>。
+    答案對純屬巧合，同樣的推理換個題目就爆炸了。實用技巧：要求 AI 在給出結論之前，先明確列出它的假設和逐步推理。
+    過程攤開來，錯誤才藏不住。
+  </p>
+
+  <h3>績效鑑別（Performance discernment）：評估協作本身</h3>
+  <p>問自己幾個問題：AI 有隨著我的回饋調整嗎，還是每次都重蹈覆轍？它會在適當時機質疑我的推理，還是我說什麼都附和？
+    它會問出有用的問題，還是只會吐答案？最根本的一題——<strong>這樣合作，真的比我自己做更好嗎？</strong>
+    如果答案是否定的，該調整的可能是你的描述方式，或根本該換工具。</p>
+
+  <div class="callout">
+    <span class="callout-title">🔁 整個框架的引擎：描述-鑑別迴圈</span>
+    <p>
+      描述告訴 AI 你要什麼；鑑別評估你拿回了什麼；而這個評估會回頭餵進你的下一次描述，讓它更精準。
+      專業協作很少一次到位——就像編輯跟作者、主管跟下屬，好結果是在來回迭代中收斂出來的。
+      期待一發入魂，本身就是不專業的期待。
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 5 章：Diligence -->
+<!-- ================================================================ -->
+<section id="s5">
+  <span class="time-badge">⏱ 9 分鐘</span>
+  <h2><span class="kicker">第 5 章 · 第四個 D</span>Diligence（勤勉）：技術卓越不等於倫理卓越</h2>
+
+  <p>
+    前三個 D 讓你把事情做對，第四個 D 確保你做的是對的事。勤勉（Diligence）講的是：
+    讓你跟 AI 的互動在組織、社會、個人層面都是適當、透明、可問責的。它一樣分三層，
+    對應「產出前、產出後、發布前」三個時間點。
+  </p>
+
+  <h3>創建勤勉（Creation diligence）——按下送出之前</h3>
+  <ul>
+    <li><strong>資料敏感性</strong>：我的 Prompt 裡有沒有個資、公司機密、商業敏感數據？這些資料會不會被服務商拿去訓練？</li>
+    <li><strong>政策遵循</strong>：這個 AI 服務是公司核准的嗎？這個用途合法合規嗎？</li>
+    <li><strong>模型選擇</strong>：這個模型真的適合這個任務嗎？我了解它已知的失效模式和偏誤嗎？</li>
+  </ul>
+  <p>很多資安事故不是駭客攻進來，是自己人把客戶名單貼進了聊天視窗。</p>
+
+  <h3>透明勤勉（Transparency diligence）——判斷是否要揭露</h3>
+  <p>
+    低風險場景像是用 AI 腦力激盪會議議程，不揭露也沒關係；高風險場景像是績效考核、法律文件、學術作業，就需要揭露。
+    揭露也不用彆扭，一句話就夠：
+  </p>
+  <div class="callout green">
+    <p>「初稿與資料整理由 AI 協助完成，所有分析、結論與建議皆經作者審查、驗證與修訂。」</p>
+  </div>
+
+  <h3>部署勤勉（Deployment diligence）——發布前的最後一道閘門</h3>
+  <div class="callout orange">
+    <span class="callout-title">🛑 最後一問</span>
+    <p>「你願意有自信地在這份內容上署名嗎？」不願意，就不要發布、不要提交、不要執行。</p>
+  </div>
+  <p>具體要做的事包括：查核事實、驗證引用來源真的存在、檢查有沒有對特定族群的偏誤、確認安全與法規要求、確認智慧財產權沒問題。</p>
+
+  <div class="callout red">
+    <span class="callout-title">⚖️ 底線</span>
+    <p>
+      問責制無法外包給 AI。如果一個自主 AI agent 核准了一筆歧視性的貸款，負責的是那個組織，不是 AI；
+      如果 coding assistant 寫進了一個安全漏洞，負責的是那位工程師，不是 assistant。
+      AI 可以分擔你的工作，但不能分擔你的責任。
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 6 章：結業測驗 -->
+<!-- ================================================================ -->
+<section id="s6">
+  <span class="time-badge">⏱ 5 分鐘</span>
+  <h2><span class="kicker">第 6 章 · 驗收時間</span>五題，測測你的 AI Fluency</h2>
+
+  <p>
+    走完 4D 框架，來驗收一下。五道題分別對應三種互動模式和四個 D，不是考記憶，是考你會不會在真實情境裡做判斷。
+    憑直覺選，然後看解說對答案。
+  </p>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q1.</span>你設定了一個 AI 助理，它會持續監看你的信箱，自己判斷哪些是例行信、哪些重要，重要的還會自動幫你安排會議。這屬於哪一種互動模式？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">自動化（Automation），因為它在處理重複性的信件任務</button>
+      <button class="quiz-opt" data-a="0">增強（Augmentation），因為它跟你一起管理信箱</button>
+      <button class="quiz-opt" data-a="1">代理（Agency），因為你只給了目標，它自主決定怎麼做並代表你行動</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      關鍵在自主程度：你沒有定義每一步，而是設定目標後由 AI 動態決策、獨立行動（包括直接約會議），
+      這正是代理模式的特徵。自動化是人定義每一步、AI 照做。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q2.</span>關於 Delegation（授權）裡的「問題認知」，以下哪個做法最正確？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">先把問題丟給 AI，讓它幫你定義問題是什麼，再開始做</button>
+      <button class="quiz-opt" data-a="1">在下 Prompt 之前，自己先想清楚問題的定義、限制與判斷標準，例如做詐騙偵測前先確認要抓哪些詐騙、能容忍多少誤判</button>
+      <button class="quiz-opt" data-a="0">問題定義不重要，反正可以靠多輪對話慢慢修正</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      「AI 加速專業，但很少取代專業」——領域判斷（抓什麼、容忍多少誤判、法規限制）是你的責任，AI 無法替你決定。
+      先花五分鐘定義問題，省掉幾小時的迭代。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q3.</span>下面哪一個描述（Description）最能體現「產品描述」的精神？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">「摘要本季財務報告，寫好一點，謝謝。」</button>
+      <button class="quiz-opt" data-a="1">「為只有 10 分鐘的高階主管摘要這份季報，聚焦商業風險與營收趨勢，條列式、最多一頁，標出跟上一季顯著不同的數字，避免複雜財務術語。」</button>
+      <button class="quiz-opt" data-a="0">「你是一位世界頂尖的財務分析大師，擁有 30 年經驗，請發揮你的全部實力摘要這份報告。」</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      產品描述的重點是把「給誰看、重點是什麼、格式、長度、什麼不要出現」講清楚——結構化的語境勝過華麗的措辭。
+      選項三是典型的「咒語式」Prompt，堆砌人設卻沒提供任何實質脈絡。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q4.</span>AI 給你一段數學推導，最終答案驗算是對的。根據「流程鑑別」的觀念，你應該？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">答案對就好，推理過程不用看，直接採用</button>
+      <button class="quiz-opt" data-a="1">檢查推理過程是否成立——因為中途的錯誤假設可能剛好被另一個錯誤抵銷，答案對只是巧合，換個題目就會出錯</button>
+      <button class="quiz-opt" data-a="0">請 AI 再算一次，兩次答案一樣就代表推理正確</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      這就是補償性錯誤（compensating errors）：錯誤的推理也可能碰巧得到正確答案。答案正確不代表過程可靠，
+      所以要請 AI 先攤開假設與逐步推理再下結論。重算一次只是重複同一套可能有問題的過程。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q5.</span>你用 AI 協助完成一份要提交的正式報告，但引用來源還沒逐一查證，你自己也不太敢掛名。根據 Diligence（勤勉），正確的做法是？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">先發布，有人發現錯誤再修正，反正錯的是 AI 不是我</button>
+      <button class="quiz-opt" data-a="0">在報告加註「本文由 AI 生成」，這樣就算出錯，責任也轉移給 AI 了</button>
+      <button class="quiz-opt" data-a="1">不發布——先查核事實、驗證引用來源，直到你願意有自信地在上面署名為止，因為問責制無法外包給 AI</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      部署勤勉的最後一道閘門就是「你願意署名嗎」，不願意就不該發布。而且揭露 AI 參與是透明義務，不是免責聲明——
+      無論如何，責任都在人身上，無法外包給 AI。
+    </div>
+  </div>
+
+  <div class="big-quote">
+    未來不屬於單純使用 AI 的人，<br>
+    而屬於<span class="hl">知道如何與 AI 協作的人</span>。
+  </div>
+
+  <div class="card">
+    <strong style="color:var(--text)">🎒 隨身 checklist：四個最常見的坑</strong>
+    <ol>
+      <li><strong>沒定義問題就開始授權</strong>——先花五分鐘想清楚問題，能省掉幾小時的來回。</li>
+      <li><strong>把描述當成一次性的 Prompt</strong>——專業協作本來就是迭代出來的，一開始就規劃多輪來回。</li>
+      <li><strong>看到講得頭頭是道的輸出就照單全收</strong>——可信不等於正確，鑑別永遠不能省。</li>
+      <li><strong>把治理與合規留到出事才處理</strong>——隱私、法規、透明度，從你打下第一個 Prompt 就該開始想。</li>
+    </ol>
+    <p class="dim" style="margin-bottom:0;">避開這四個坑，你就已經走在大多數人前面了。</p>
+  </div>
+</section>
+
+<section id="cta">
+  <div class="card cta-card">
+    <h3>想有人手把手帶你，把 AI 真的用進日常？</h3>
+    <p class="dim">我是 Lewis，開了 AgentVibe 補習班，一對一線上教學，60 分鐘幫你裝好自己的 AI 助理——不用工程背景，只要會打字。</p>
+    <a class="cta-btn" href="https://lewsiai.com" target="_blank" rel="noopener">預約試上 →</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  AI Fluency 一小時上手 · 內容改編自 Anthropic 官方「AI Fluency Framework」（Rick Dakan &amp; Joseph Feller，CC BY-NC-SA 4.0）<br>
+  純靜態頁面，無任何追蹤與後端（除必要的網站流量統計）
+</footer>
+
+<script>
+/* ================================================================
+   主題切換（記憶到 localStorage）
+================================================================ */
+const themeBtn = document.getElementById('theme-toggle');
+const THEME_KEY = 'ai-fluency-framework-course-theme';
+function applyTheme(light) {
+  document.documentElement.classList.toggle('light', light);
+  themeBtn.textContent = light ? '🌙 深色' : '☀️ 淺色';
+}
+applyTheme(localStorage.getItem(THEME_KEY) === 'light');
+themeBtn.addEventListener('click', () => {
+  const isLight = !document.documentElement.classList.contains('light');
+  applyTheme(isLight);
+  localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark');
+});
+
+/* ================================================================
+   捲動進度條 + 章節導覽高亮
+================================================================ */
+const scrollbar = document.getElementById('scrollbar');
+const navSteps = [...document.querySelectorAll('.nav-step')];
+const sections = navSteps.map(a => document.getElementById(a.dataset.sec));
+
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+  scrollbar.style.width = pct + '%';
+
+  let activeIdx = -1;
+  sections.forEach((sec, i) => {
+    if (sec.getBoundingClientRect().top < window.innerHeight * 0.45) activeIdx = i;
+  });
+  navSteps.forEach((a, i) => {
+    a.classList.toggle('active', i === activeIdx);
+    a.classList.toggle('done', i < activeIdx);
+  });
+}, { passive: true });
+
+/* ================================================================
+   測驗
+================================================================ */
+document.querySelectorAll('[data-quiz]').forEach(quiz => {
+  const opts = quiz.querySelectorAll('.quiz-opt');
+  const expl = quiz.querySelector('.quiz-expl');
+  const verdict = expl.querySelector('.verdict');
+  opts.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const correct = btn.dataset.a === '1';
+      opts.forEach(b => {
+        b.disabled = true;
+        if (b.dataset.a === '1') b.classList.add('correct');
+      });
+      if (!correct) {
+        btn.classList.add('wrong');
+        verdict.textContent = '❌ 差一點！正確答案已標綠。';
+        verdict.style.color = 'var(--red)';
+      } else {
+        verdict.textContent = '✅ 答對了！';
+        verdict.style.color = 'var(--green)';
+      }
+      expl.classList.add('show');
+    });
+  });
+});
+</script>
+</body>
+</html>
