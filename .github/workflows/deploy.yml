@@ -20,12 +20,6 @@ jobs:
             set -e
             PROJECT=ai-fluency-framework-course
 
-            if [ ! -d /srv/projects/$PROJECT ]; then
-              sudo mkdir -p /srv/projects/$PROJECT
-              sudo chown lewsi:lewsi /srv/projects/$PROJECT
-              git clone git@github.com:Lewsiafat/$PROJECT.git /srv/projects/$PROJECT
-            fi
-
             cd /srv/projects/$PROJECT
             git pull origin main
 
